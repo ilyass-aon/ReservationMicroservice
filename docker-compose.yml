@@ -1,0 +1,38 @@
+services:
+  reservation-mysql:
+    image: mysql:8
+    container_name: reservation-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: #password
+      MYSQL_DATABASE: reservation
+    ports:
+      - "3307:3306"   # host:container
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - reservation-net
+
+  reservation-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reservation-microservice
+    depends_on:
+      - reservation-mysql
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://reservation-mysql:3306/reservation
+      SPRING_DATASOURCE_USERNAME: #userName
+      SPRING_DATASOURCE_PASSWORD: #password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect
+    networks:
+      - reservation-net
+
+volumes:
+  mysql-data:
+
+networks:
+  reservation-net:
